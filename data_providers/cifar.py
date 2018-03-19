@@ -5,7 +5,6 @@ import random
 
 import numpy as np
 
-
 from .base_provider import ImagesDataSet, DataProvider
 from .downloader import download_data_url
 
@@ -26,9 +25,9 @@ def augment_image(image, pad):
     init_x = np.random.randint(0, pad * 2)
     init_y = np.random.randint(0, pad * 2)
     cropped = zeros_padded[
-        init_x: init_x + init_shape[0],
-        init_y: init_y + init_shape[1],
-        :]
+              init_x: init_x + init_shape[0],
+              init_y: init_y + init_shape[1],
+              :]
     return cropped
 
 
@@ -173,7 +172,7 @@ class CifarDataProvider(DataProvider):
     def save_path(self):
         if self._save_path is None:
             self._save_path = os.path.join(
-                tempfile.gettempdir(), 'cifar%d' % self.n_classes)
+                os.path.expanduser('~'), 'cifar%d' % self.n_classes)
         return self._save_path
 
     @property
@@ -257,6 +256,7 @@ if __name__ == '__main__':
     # some sanity checks for Cifar data providers
     import matplotlib.pyplot as plt
 
+
     # plot some CIFAR10 images with classes
     def plot_images_labels(images, labels, axes, main_label, classes):
         plt.text(0, 1.5, main_label, ha='center', va='top',
@@ -265,6 +265,7 @@ if __name__ == '__main__':
             axe.imshow(image)
             axe.set_title(classes[np.argmax(label)])
             axe.set_axis_off()
+
 
     cifar_10_idx_to_class = ['airplane', 'automobile', 'bird', 'cat', 'deer',
                              'dog', 'frog', 'horse', 'ship', 'truck']

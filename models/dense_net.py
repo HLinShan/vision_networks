@@ -6,7 +6,6 @@ from datetime import timedelta
 import numpy as np
 import tensorflow as tf
 
-
 TF_VERSION = float('.'.join(tf.__version__.split('.')[:2]))
 
 
@@ -80,6 +79,8 @@ class DenseNet:
         self.batches_step = 0
 
         self._define_inputs()
+
+    def build(self):
         self._build_graph()
         self._initialize_session()
         self._count_trainable_params()

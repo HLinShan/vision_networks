@@ -1,6 +1,6 @@
 import argparse
-
-from models.dense_net import DenseNet
+from models.my_separable_dense_net import SDenseNet
+from models.my_dense_net import MyDenseNet
 from data_providers.utils import get_data_provider_by_name
 
 train_params_cifar = {
@@ -38,7 +38,7 @@ def get_train_params_by_name(name):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--train', action='store_true',
+        '--train', action='store_true', default=True,
         help='Train the model')
     parser.add_argument(
         '--test', action='store_true',
@@ -47,7 +47,7 @@ if __name__ == '__main__':
              'performed right after training.')
     parser.add_argument(
         '--model_type', '-m', type=str, choices=['DenseNet', 'DenseNet-BC'],
-        default='DenseNet',
+        default='DenseNet-BC',
         help='What type of model to use')
     parser.add_argument(
         '--growth_rate', '-k', type=int, choices=[12, 24, 40],
@@ -56,12 +56,12 @@ if __name__ == '__main__':
              'choices were restricted to used in paper')
     parser.add_argument(
         '--depth', '-d', type=int, choices=[40, 100, 190, 250],
-        default=40,
+        default=100,
         help='Depth of whole network, restricted to paper choices')
     parser.add_argument(
         '--dataset', '-ds', type=str,
         choices=['C10', 'C10+', 'C100', 'C100+', 'SVHN'],
-        default='C10',
+        default='C10+',
         help='What dataset should be used')
     parser.add_argument(
         '--total_blocks', '-tb', type=int, default=3, metavar='',
@@ -134,7 +134,8 @@ if __name__ == '__main__':
     print("Prepare training data...")
     data_provider = get_data_provider_by_name(args.dataset, train_params)
     print("Initialize the model..")
-    model = DenseNet(data_provider=data_provider, **model_params)
+    model = SDenseNet(data_provider=data_provider, **model_params)
+    model.build()
     if args.train:
         print("Data provider train images: ", data_provider.train.num_examples)
         model.train_all_epochs(train_params)
