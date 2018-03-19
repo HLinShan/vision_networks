@@ -11,6 +11,7 @@ class ResDenseNet(MyDenseNet):
                  renew_logs=False,
                  reduction=1.0,
                  bc_mode=False,
+                 cardinality=2,
                  **kwargs):
         super().__init__(data_provider, growth_rate, depth,
                          total_blocks, keep_prob,
@@ -20,8 +21,49 @@ class ResDenseNet(MyDenseNet):
                          reduction,
                          bc_mode,
                          **kwargs)
+        self.cardinality = cardinality
 
     def _inference(self):
-        pass
+        growth_rate = self.growth_rate
+        layers_per_block = self.layers_per_block
+        # first conv
+        with slim.arg_scope(self.arg_scope()):
+            with tf.variable_scope("Initial_convolution"):
+                net = slim.conv2d(self.images, self.first_output_features, [3, 3])
 
+            for block in range(self.total_blocks):
+                with tf.variable_scope("Block_%d" % block):
+                    net = self.add_block(net, growth_rate, layers_per_block)
 
+                if block != self.total_blocks - 1:
+                    with tf.variable_scope("Transition_after_block_%d" % block):
+                        net = self.transition_layer(net)
+
+            with tf.variable_scope("Transition_to_classes"):
+                net = slim.batch_norm(net)
+                net = tf.reduce_mean(net, axis=[1, 2])
+                net = slim.flatten(net)
+                logits = slim.fully_connected(net, self.n_classes)
+
+            return logits
+
+    def add_block(self, _input, growth_rate, layers_per_block):
+        cardinality = self.cardinality
+        nets = []
+        new_nets = []
+        for c in range(cardinality):
+            new_nets.append(_input)
+
+        for layer in range(layers_per_block):
+            nets = new_nets
+            new_nets = []
+            for c in range(cardinality):
+                if layer == 0:
+                    net = nets[c]
+                else:
+                    net = tf.concat(nets, axis=3)
+                net = self.composite_function(net, growth_rate, 3)
+                net = tf.concat([net, nets[c]], axis=3)
+                new_nets.append(net)
+
+        return tf.concat(nets, axis=3)

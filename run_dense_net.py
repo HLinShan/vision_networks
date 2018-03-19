@@ -78,6 +78,9 @@ if __name__ == '__main__':
     parser.add_argument(
         '--reduction', '-red', type=float, default=0.5, metavar='',
         help='reduction Theta at transition layer for DenseNets-BC models')
+    parser.add_argument(
+        '--cardinality', '-c', type=int, default=2,
+        help='cardinality')
 
     parser.add_argument(
         '--logs', dest='should_save_logs', action='store_true',
