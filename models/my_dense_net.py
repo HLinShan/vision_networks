@@ -78,6 +78,14 @@ class MyDenseNet(DenseNet):
 
             return logits
 
+    def transition_layer(self, _input):
+        # call composite function with 1x1 kernel
+        out_features = int(int(_input.get_shape()[-1]) * self.reduction)
+        net = self.composite_function(_input, out_features, kernel_size=1)
+        # run average pooling
+        net = slim.avg_pool2d(net, [2, 2])
+        return net
+
     def add_internal_layer(self, _input, growth_rate):
         net = _input
         if self.bc_mode:
@@ -96,8 +104,8 @@ class MyDenseNet(DenseNet):
             net = self.dropout(net)
         return net
 
-    def composite_function(self, _input, out_features, kernel_size=3):
-        with tf.variable_scope("composite_function"):
+    def composite_function(self, _input, out_features, kernel_size=3, i=0):
+        with tf.variable_scope("composite_function_%d" % i):
             net = slim.batch_norm(_input)
             net = slim.conv2d(net, out_features, [kernel_size, kernel_size])
             net = self.dropout(net)
