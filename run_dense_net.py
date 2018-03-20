@@ -48,16 +48,16 @@ if __name__ == '__main__':
     parser.add_argument(
         '--model_type', '-m', type=str,
         choices=['DenseNet', 'DenseNet-BC', 'XDenseNet', 'XDenseNet-BC'],
-        default='XDenseNet',
+        default='XDenseNet-BC',
         help='What type of model to use')
     parser.add_argument(
         '--growth_rate', '-k', type=int, choices=[4, 6, 12, 24, 40],
-        default=4,
+        default=6,
         help='Grows rate for every layer, '
              'choices were restricted to used in paper')
     parser.add_argument(
         '--depth', '-d', type=int, choices=[40, 100, 190, 250],
-        default=40,
+        default=100,
         help='Depth of whole network, restricted to paper choices')
     parser.add_argument(
         '--dataset', '-ds', type=str,
@@ -65,7 +65,7 @@ if __name__ == '__main__':
         default='C10+',
         help='What dataset should be used')
     parser.add_argument(
-        '--total_blocks', '-tb', type=int, default=3, metavar='',
+        '--total_blocks', '-tb', type=int, default=4, metavar='',
         help='Total blocks of layers stack (default: %(default)s)')
     parser.add_argument(
         '--keep_prob', '-kp', type=float, metavar='',
@@ -142,6 +142,7 @@ if __name__ == '__main__':
         model = MyDenseNet(data_provider=data_provider, **model_params)
     else:
         model = XDenseNet(data_provider=data_provider, **model_params)
+
     model.build()
     # model.summary_writer.add_graph(model.sess.graph)
     if args.train:

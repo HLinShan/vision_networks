@@ -47,6 +47,27 @@ class XDenseNet(MyDenseNet):
 
             return logits
 
+    # def add_block(self, _input, growth_rate, layers_per_block):
+    #     cardinality = self.cardinality
+    #     nets = []
+    #     for c in range(cardinality):
+    #         nets.append(_input)
+    #     for layer in range(layers_per_block):
+    #         with tf.variable_scope("layer_%d" % layer):
+    #             con_net = tf.concat(nets, axis=3)
+    #             for c in range(cardinality):
+    #                 if layer == 0:
+    #                     net = nets[c]
+    #                 else:
+    #                     net = con_net
+    #                 if self.bc_mode:
+    #                     net = self.bottleneck(net, self.growth_rate * 2, c)
+    #                 net = self.composite_function(net, growth_rate, 3, c)
+    #                 nets[c] = tf.concat([net, nets[c]], axis=3)
+    #
+    #     net = tf.concat(nets, axis=3)
+    #     return net
+
     def add_block(self, _input, growth_rate, layers_per_block):
         cardinality = self.cardinality
         nets = []
@@ -54,14 +75,14 @@ class XDenseNet(MyDenseNet):
             nets.append(_input)
         for layer in range(layers_per_block):
             with tf.variable_scope("layer_%d" % layer):
-                con_net = tf.concat(nets, axis=3)
+                con_net = tf.add_n(nets)
                 for c in range(cardinality):
                     if layer == 0:
                         net = nets[c]
                     else:
                         net = con_net
                     if self.bc_mode:
-                        net = self.bottleneck(net, self.growth_rate * 2)
+                        net = self.bottleneck(net, self.growth_rate * 4, c)
                     net = self.composite_function(net, growth_rate, 3, c)
                     nets[c] = tf.concat([net, nets[c]], axis=3)
 

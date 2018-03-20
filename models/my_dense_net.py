@@ -97,8 +97,8 @@ class MyDenseNet(DenseNet):
         output = tf.concat(axis=3, values=(_input, net))
         return output
 
-    def bottleneck(self, _input, out_features):
-        with tf.variable_scope("bottleneck"):
+    def bottleneck(self, _input, out_features, i=0):
+        with tf.variable_scope("bottleneck_%d" % i):
             net = slim.batch_norm(_input)
             net = slim.conv2d(net, out_features, [1, 1])
             net = self.dropout(net)
