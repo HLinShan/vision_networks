@@ -4,7 +4,7 @@ from models.x_dense_net import XDenseNet
 from data_providers.utils import get_data_provider_by_name
 
 train_params_cifar = {
-    'batch_size': 64,
+    'batch_size': 128,
     'n_epochs': 300,
     'initial_learning_rate': 0.1,
     'reduce_lr_epoch_1': 150,  # epochs * 0.5
@@ -48,11 +48,11 @@ if __name__ == '__main__':
     parser.add_argument(
         '--model_type', '-m', type=str,
         choices=['DenseNet', 'DenseNet-BC', 'XDenseNet', 'XDenseNet-BC'],
-        default='XDenseNet-BC',
+        default='DenseNet-BC',
         help='What type of model to use')
     parser.add_argument(
         '--growth_rate', '-k', type=int, choices=[4, 6, 12, 24, 40],
-        default=6,
+        default=12,
         help='Grows rate for every layer, '
              'choices were restricted to used in paper')
     parser.add_argument(
@@ -113,7 +113,7 @@ if __name__ == '__main__':
         if args.dataset in ['C10', 'C100', 'SVHN']:
             args.keep_prob = 0.8
         else:
-            args.keep_prob = 1.0
+            args.keep_prob = 1
     if args.model_type == 'DenseNet' or args.model_type == 'XDenseNet':
         args.bc_mode = False
         args.reduction = 1.0
@@ -138,10 +138,10 @@ if __name__ == '__main__':
     print("Prepare training data...")
     data_provider = get_data_provider_by_name(args.dataset, train_params)
     print("Initialize the model..")
-    if args.model_type == 'DenseNet' or args.model_type == 'DenseNet-BC':
-        model = MyDenseNet(data_provider=data_provider, **model_params)
-    else:
-        model = XDenseNet(data_provider=data_provider, **model_params)
+    # if args.model_type == 'DenseNet' or args.model_type == 'DenseNet-BC':
+    # model = MyDenseNet(data_provider=data_provider, **model_params)
+    # else:
+    model = MyDenseNet(data_provider=data_provider, **model_params)
 
     model.build()
     # model.summary_writer.add_graph(model.sess.graph)

@@ -82,6 +82,7 @@ class MyDenseNet(DenseNet):
         # call composite function with 1x1 kernel
         out_features = int(int(_input.get_shape()[-1]) * self.reduction)
         net = self.composite_function(_input, out_features, kernel_size=1)
+        # net = self.squeeze_excitation_layer(net, out_features, 16)
         # run average pooling
         net = slim.avg_pool2d(net, [2, 2])
         return net
@@ -101,6 +102,7 @@ class MyDenseNet(DenseNet):
         with tf.variable_scope("bottleneck_%d" % i):
             net = slim.batch_norm(_input)
             net = slim.conv2d(net, out_features, [1, 1])
+            # net = self.squeeze_excitation_layer(net, out_features, 16)
             net = self.dropout(net)
         return net
 
@@ -108,8 +110,20 @@ class MyDenseNet(DenseNet):
         with tf.variable_scope("composite_function_%d" % i):
             net = slim.batch_norm(_input)
             net = slim.conv2d(net, out_features, [kernel_size, kernel_size])
+            # net = self.squeeze_excitation_layer(net, out_features, 16)
             net = self.dropout(net)
+            # net = self.squeeze_excitation_layer(net, out_features, 16)
         return net
+
+    # def squeeze_excitation_layer(self, _input, out_dim, ratio):
+    #     # with tf.name_scope("squeeze_excitation_%i" % i):
+    #     squeeze = tf.reduce_mean(_input, axis=[1, 2])
+    #     excitation = slim.fully_connected(squeeze, out_dim // ratio)
+    #     excitation = slim.fully_connected(excitation, out_dim, activation_fn=tf.nn.relu)
+    #     excitation = tf.reshape(excitation, [-1, 1, 1, out_dim])
+    #     scale = _input * excitation
+    #
+    #     return scale
 
     def arg_scope(self):
         with slim.arg_scope([slim.batch_norm],

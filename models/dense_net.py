@@ -421,11 +421,11 @@ class DenseNet:
             _, loss, accuracy = result
             total_loss.append(loss)
             total_accuracy.append(accuracy)
-            if self.should_save_logs:
-                self.batches_step += 1
-                self.log_loss_accuracy(
-                    loss, accuracy, self.batches_step, prefix='per_batch',
-                    should_print=False)
+            # if self.should_save_logs:
+            #     self.batches_step += 1
+            #     self.log_loss_accuracy(
+            #         loss, accuracy, self.batches_step, prefix='per_batch',
+            #         should_print=False)
         mean_loss = np.mean(total_loss)
         mean_accuracy = np.mean(total_accuracy)
         return mean_loss, mean_accuracy
