@@ -20,12 +20,14 @@ class ADenseNet(MyDenseNet):
                          reduction,
                          bc_mode,
                          **kwargs)
+        self.nets = []
 
     def _inference(self):
         growth_rate = self.growth_rate
         layers_per_block = self.layers_per_block
+        for i in range(self.layers_per_block):
+            self.nets.append(None)
         # first conv
-        nets = []
         with slim.arg_scope(self.arg_scope()):
             with tf.variable_scope("Initial_convolution"):
                 net = slim.conv2d(self.images, self.first_output_features, [3, 3])
@@ -33,9 +35,7 @@ class ADenseNet(MyDenseNet):
             for block in range(self.total_blocks):
                 with tf.variable_scope("Block_%d" % block):
                     for layer in range(layers_per_block):
-                        with tf.variable_scope("layer_%d" % layer):
-                            net = self.add_internal_layer(net, growth_rate)
-
+                        net = self.add_internal_layer(net, growth_rate, layer)
                 if block != self.total_blocks - 1:
                     with tf.variable_scope("Transition_after_block_%d" % block):
                         net = self.transition_layer(net)
@@ -47,3 +47,16 @@ class ADenseNet(MyDenseNet):
                 logits = slim.fully_connected(net, self.n_classes)
 
             return logits
+
+    def add_internal_layer(self, _input, growth_rate, layer=0):
+        with tf.variable_scope("layer_%d" % layer):
+            net = _input
+            if self.nets[layer] is not None:
+                net = tf.concat([net, self.nets[layer]], axis=3)
+            if self.bc_mode:
+                net = self.bottleneck(net, self.growth_rate * 4)
+
+            net = self.composite_function(net, self.growth_rate, 3)
+            self.nets[layer] = slim.avg_pool2d(net, [2, 2])
+            output = tf.concat([_input, net], axis=3)
+        return output

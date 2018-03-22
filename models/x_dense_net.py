@@ -54,7 +54,7 @@ class XDenseNet(MyDenseNet):
             nets.append(_input)
         for layer in range(layers_per_block):
             with tf.variable_scope("layer_%d" % layer):
-                con_net = tf.add_n(nets)
+                con_net = tf.concat(nets, axis=3)
                 for c in range(cardinality):
                     if layer == 0:
                         net = nets[c]

@@ -1,10 +1,11 @@
 import argparse
 from models.my_dense_net import MyDenseNet
 from models.x_dense_net import XDenseNet
+from models.a_dense_net import ADenseNet
 from data_providers.utils import get_data_provider_by_name
 
 train_params_cifar = {
-    'batch_size': 128,
+    'batch_size': 64,
     'n_epochs': 300,
     'initial_learning_rate': 0.1,
     'reduce_lr_epoch_1': 150,  # epochs * 0.5
@@ -65,7 +66,7 @@ if __name__ == '__main__':
         default='C10+',
         help='What dataset should be used')
     parser.add_argument(
-        '--total_blocks', '-tb', type=int, default=4, metavar='',
+        '--total_blocks', '-tb', type=int, default=3, metavar='',
         help='Total blocks of layers stack (default: %(default)s)')
     parser.add_argument(
         '--keep_prob', '-kp', type=float, metavar='',
@@ -141,17 +142,18 @@ if __name__ == '__main__':
     # if args.model_type == 'DenseNet' or args.model_type == 'DenseNet-BC':
     # model = MyDenseNet(data_provider=data_provider, **model_params)
     # else:
-    model = MyDenseNet(data_provider=data_provider, **model_params)
+    model = ADenseNet(data_provider=data_provider, **model_params)
 
     model.build()
-    # model.summary_writer.add_graph(model.sess.graph)
-    if args.train:
-        print("Data provider train images: ", data_provider.train.num_examples)
-        model.train_all_epochs(train_params)
-    if args.test:
-        if not args.train:
-            model.load_model()
-        print("Data provider test images: ", data_provider.test.num_examples)
-        print("Testing...")
-        loss, accuracy = model.test(data_provider.test, batch_size=200)
-        print("mean cross_entropy: %f, mean accuracy: %f" % (loss, accuracy))
+    model.summary_writer.add_graph(model.sess.graph)
+    print('1')
+    # if args.train:
+    #     print("Data provider train images: ", data_provider.train.num_examples)
+    #     model.train_all_epochs(train_params)
+    # if args.test:
+    #     if not args.train:
+    #         model.load_model()
+    #     print("Data provider test images: ", data_provider.test.num_examples)
+    #     print("Testing...")
+    #     loss, accuracy = model.test(data_provider.test, batch_size=200)
+    #     print("mean cross_entropy: %f, mean accuracy: %f" % (loss, accuracy))
