@@ -39,11 +39,14 @@ class ADenseNet(MyDenseNet):
                 if block != self.total_blocks - 1:
                     with tf.variable_scope("Transition_after_block_%d" % block):
                         net = self.transition_layer(net)
+                        self.nets.append(tf.reduce_mean(net, axis=[1, 2]))
 
             with tf.variable_scope("Transition_to_classes"):
+                self.nets.append(tf.reduce_mean(net, axis=[1, 2]))
+                net = tf.concat([self.nets], axis=1)
                 net = slim.batch_norm(net)
                 net = tf.reduce_mean(net, axis=[1, 2])
-                net = slim.flatten(net)
+                # net = slim.flatten(net)
                 logits = slim.fully_connected(net, self.n_classes)
 
             return logits
@@ -51,12 +54,9 @@ class ADenseNet(MyDenseNet):
     def add_internal_layer(self, _input, growth_rate, layer=0):
         with tf.variable_scope("layer_%d" % layer):
             net = _input
-            if self.nets[layer] is not None:
-                net = tf.concat([net, self.nets[layer]], axis=3)
             if self.bc_mode:
                 net = self.bottleneck(net, self.growth_rate * 4)
 
             net = self.composite_function(net, self.growth_rate, 3)
-            self.nets[layer] = slim.avg_pool2d(net, [2, 2])
             output = tf.concat([_input, net], axis=3)
         return output

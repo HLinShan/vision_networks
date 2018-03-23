@@ -1,6 +1,8 @@
 import argparse
 from models.my_dense_net import MyDenseNet
 from models.x_dense_net import XDenseNet
+from models.a_dense_net import ADenseNet
+from models.my_separable_dense_net import SDenseNet
 from data_providers.utils import get_data_provider_by_name
 
 train_params_cifar = {
@@ -47,8 +49,11 @@ if __name__ == '__main__':
              'performed right after training.')
     parser.add_argument(
         '--model_type', '-m', type=str,
-        choices=['DenseNet', 'DenseNet-BC', 'XDenseNet', 'XDenseNet-BC', 'SDenseNet', 'SDenseNet-BC'],
-        default='SDenseNet-BC',
+        choices=['DenseNet', 'DenseNet-BC',
+                 'XDenseNet', 'XDenseNet-BC',
+                 'SDenseNet', 'SDenseNet-BC',
+                 'ADenseNet', 'ADenseNet-BC'],
+        default='ADenseNet-BC',
         help='What type of model to use')
     parser.add_argument(
         '--growth_rate', '-k', type=int, choices=[4, 6, 12, 24, 40],
@@ -114,11 +119,12 @@ if __name__ == '__main__':
             args.keep_prob = 0.8
         else:
             args.keep_prob = 1
-    if args.model_type == 'DenseNet' or args.model_type == 'SDenseNet':
+
+    if args.model_type.endswith('-BC'):
+        args.bc_mode = True
+    else:
         args.bc_mode = False
         args.reduction = 1.0
-    elif args.model_type == 'DenseNet-BC' or args.model_type == 'SDenseNet-BC':
-        args.bc_mode = True
 
     model_params = vars(args)
 
@@ -141,7 +147,7 @@ if __name__ == '__main__':
     # if args.model_type == 'DenseNet' or args.model_type == 'DenseNet-BC':
     # model = MyDenseNet(data_provider=data_provider, **model_params)
     # else:
-    model = MyDenseNet(data_provider=data_provider, **model_params)
+    model = ADenseNet(data_provider=data_provider, **model_params)
 
     model.build()
     # model.summary_writer.add_graph(model.sess.graph)

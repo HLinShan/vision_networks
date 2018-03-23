@@ -136,7 +136,7 @@ class DenseNet:
 
     @property
     def model_identifier(self):
-        return "{}_growth_rate={}_depth={}_dataset_{}".format(
+        return "{}_k={}_depth={}_ds_{}".format(
             self.model_type, self.growth_rate, self.depth, self.dataset_name)
 
     def save_model(self, global_step=None):
