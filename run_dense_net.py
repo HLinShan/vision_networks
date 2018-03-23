@@ -1,10 +1,11 @@
 import argparse
 from models.my_dense_net import MyDenseNet
 from models.x_dense_net import XDenseNet
+from models.my_separable_dense_net import SDenseNet
 from data_providers.utils import get_data_provider_by_name
 
 train_params_cifar = {
-    'batch_size': 128,
+    'batch_size': 64,
     'n_epochs': 300,
     'initial_learning_rate': 0.1,
     'reduce_lr_epoch_1': 150,  # epochs * 0.5
@@ -47,12 +48,12 @@ if __name__ == '__main__':
              'performed right after training.')
     parser.add_argument(
         '--model_type', '-m', type=str,
-        choices=['DenseNet', 'DenseNet-BC', 'XDenseNet', 'XDenseNet-BC'],
-        default='DenseNet-BC',
+        choices=['DenseNet', 'DenseNet-BC', 'XDenseNet', 'XDenseNet-BC', 'SDenseNet', 'SDenseNet-BC'],
+        default='SDenseNet-BC',
         help='What type of model to use')
     parser.add_argument(
         '--growth_rate', '-k', type=int, choices=[4, 6, 12, 24, 40],
-        default=12,
+        default=6,
         help='Grows rate for every layer, '
              'choices were restricted to used in paper')
     parser.add_argument(
@@ -65,7 +66,7 @@ if __name__ == '__main__':
         default='C10+',
         help='What dataset should be used')
     parser.add_argument(
-        '--total_blocks', '-tb', type=int, default=4, metavar='',
+        '--total_blocks', '-tb', type=int, default=3, metavar='',
         help='Total blocks of layers stack (default: %(default)s)')
     parser.add_argument(
         '--keep_prob', '-kp', type=float, metavar='',
@@ -114,10 +115,10 @@ if __name__ == '__main__':
             args.keep_prob = 0.8
         else:
             args.keep_prob = 1
-    if args.model_type == 'DenseNet' or args.model_type == 'XDenseNet':
+    if args.model_type == 'DenseNet' or args.model_type == 'SDenseNet':
         args.bc_mode = False
         args.reduction = 1.0
-    elif args.model_type == 'DenseNet-BC' or args.model_type == 'XDenseNet-BC':
+    elif args.model_type == 'DenseNet-BC' or args.model_type == 'SDenseNet-BC':
         args.bc_mode = True
 
     model_params = vars(args)
@@ -141,7 +142,8 @@ if __name__ == '__main__':
     # if args.model_type == 'DenseNet' or args.model_type == 'DenseNet-BC':
     # model = MyDenseNet(data_provider=data_provider, **model_params)
     # else:
-    model = MyDenseNet(data_provider=data_provider, **model_params)
+    # model = SDenseNet(data_provider=data_provider, **model_params)
+    model = XDenseNet(data_provider=data_provider, **model_params)
 
     model.build()
     # model.summary_writer.add_graph(model.sess.graph)

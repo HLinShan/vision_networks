@@ -24,8 +24,7 @@ class SDenseNet(MyDenseNet):
     def add_internal_layer(self, _input, growth_rate):
         net = _input
         net = slim.batch_norm(net)
-        net = slim.separable_conv2d(net, self.growth_rate, [3, 3], depth_multiplier=1)
-        # concatenate _input with out from composite function
+        net = slim.separable_conv2d(net, self.growth_rate * 4, [3, 3], depth_multiplier=1)
         net = slim.batch_norm(net)
         net = slim.separable_conv2d(net, self.growth_rate, [3, 3], depth_multiplier=1)
         output = tf.concat(axis=3, values=(_input, net))
