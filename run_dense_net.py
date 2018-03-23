@@ -1,7 +1,6 @@
 import argparse
 from models.my_dense_net import MyDenseNet
 from models.x_dense_net import XDenseNet
-from models.my_separable_dense_net import SDenseNet
 from data_providers.utils import get_data_provider_by_name
 
 train_params_cifar = {
@@ -53,7 +52,7 @@ if __name__ == '__main__':
         help='What type of model to use')
     parser.add_argument(
         '--growth_rate', '-k', type=int, choices=[4, 6, 12, 24, 40],
-        default=6,
+        default=12,
         help='Grows rate for every layer, '
              'choices were restricted to used in paper')
     parser.add_argument(
@@ -142,8 +141,7 @@ if __name__ == '__main__':
     # if args.model_type == 'DenseNet' or args.model_type == 'DenseNet-BC':
     # model = MyDenseNet(data_provider=data_provider, **model_params)
     # else:
-    # model = SDenseNet(data_provider=data_provider, **model_params)
-    model = XDenseNet(data_provider=data_provider, **model_params)
+    model = MyDenseNet(data_provider=data_provider, **model_params)
 
     model.build()
     # model.summary_writer.add_graph(model.sess.graph)
