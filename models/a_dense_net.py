@@ -43,7 +43,7 @@ class ADenseNet(MyDenseNet):
             with tf.variable_scope("Transition_to_classes"):
                 net = slim.batch_norm(net)
                 net = tf.reduce_mean(net, axis=[1, 2])
-                net = slim.flatten(net)
+                # net = slim.flatten(net)
                 logits = slim.fully_connected(net, self.n_classes)
 
             return logits
