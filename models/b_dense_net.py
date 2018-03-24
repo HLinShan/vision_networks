@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow.contrib import slim
 
 
-class ADenseNet(MyDenseNet):
+class BDenseNet(MyDenseNet):
     def __init__(self, data_provider, growth_rate, depth,
                  total_blocks, keep_prob,
                  weight_decay, nesterov_momentum, model_type, dataset,
@@ -25,8 +25,6 @@ class ADenseNet(MyDenseNet):
     def _inference(self):
         growth_rate = self.growth_rate
         layers_per_block = self.layers_per_block
-        for i in range(self.layers_per_block):
-            self.nets.append(None)
         # first conv
         with slim.arg_scope(self.arg_scope()):
             with tf.variable_scope("Initial_convolution"):
@@ -43,10 +41,7 @@ class ADenseNet(MyDenseNet):
 
             with tf.variable_scope("Transition_to_classes"):
                 self.nets.append(tf.reduce_mean(net, axis=[1, 2]))
-                net = tf.concat([self.nets], axis=1)
-                net = slim.batch_norm(net)
-                net = tf.reduce_mean(net, axis=[1, 2])
-                # net = slim.flatten(net)
+                net = tf.concat([self.nets[0], self.nets[1], self.nets[2]], axis=1)
                 logits = slim.fully_connected(net, self.n_classes)
 
             return logits
