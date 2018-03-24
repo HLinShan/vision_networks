@@ -2,6 +2,9 @@ from models.my_dense_net import MyDenseNet
 import tensorflow as tf
 from tensorflow.contrib import slim
 
+"""
+    每一个trainsecion layer 后面拉出一条线给预测结果
+"""
 
 class BDenseNet(MyDenseNet):
     def __init__(self, data_provider, growth_rate, depth,
