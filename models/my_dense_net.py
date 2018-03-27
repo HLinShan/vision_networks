@@ -75,7 +75,7 @@ class MyDenseNet(Net):
 
     @property
     def model_identifier(self):
-        return "{}_k={}_depth={}_ds_{}".format(
+        return "{}_k={}_depth={}_ds={}".format(
             self.model_type, self.growth_rate, self.depth, self.dataset_name)
 
     def transition_layer(self, _input):

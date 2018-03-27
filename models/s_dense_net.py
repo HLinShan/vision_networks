@@ -23,10 +23,11 @@ class SDenseNet(MyDenseNet):
 
     def add_internal_layer(self, _input, growth_rate):
         net = _input
-        net = slim.batch_norm(net)
-        net = slim.separable_conv2d(net, self.growth_rate * 4, [3, 3], depth_multiplier=1)
+        net = slim.batch_norm(net, activation_fn=None)
+        net = slim.separable_conv2d(net, self.growth_rate * 4, [1, 1], depth_multiplier=1)
         net = slim.batch_norm(net)
         net = slim.separable_conv2d(net, self.growth_rate, [3, 3], depth_multiplier=1)
+        net = slim.batch_norm(net, activation_fn=None)
         output = tf.concat(axis=3, values=(_input, net))
         return output
 
@@ -38,3 +39,8 @@ class SDenseNet(MyDenseNet):
         # run average pooling
         net = slim.avg_pool2d(net, [2, 2])
         return net
+
+    @property
+    def model_identifier(self):
+        return "{}_k={}_depth={}_ds={}_bn_conv_bn_relu_conv_bn".format(
+            self.model_type, self.growth_rate, self.depth, self.dataset_name)
