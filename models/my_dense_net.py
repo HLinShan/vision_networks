@@ -1,9 +1,9 @@
-from models.dense_net import DenseNet
+from models.net import Net
 import tensorflow as tf
 from tensorflow.contrib import slim
 
 
-class MyDenseNet(DenseNet):
+class MyDenseNet(Net):
     def __init__(self, data_provider, growth_rate, depth,
                  total_blocks, keep_prob,
                  weight_decay, nesterov_momentum, model_type, dataset,
@@ -12,45 +12,23 @@ class MyDenseNet(DenseNet):
                  reduction=1.0,
                  bc_mode=False,
                  **kwargs):
-        """
-
-        :param data_provider:
-        :param growth_rate:
-        :param depth:
-        :param total_blocks:
-        :param keep_prob:
-        :param weight_decay:
-        :param nesterov_momentum:
-        :param model_type:
-        :param dataset:
-        :param should_save_logs:
-        :param should_save_model:
-        :param renew_logs:
-        :param reduction:
-        :param bc_mode:
-        :param kwargs:
-        """
-        super().__init__(data_provider, growth_rate, depth,
-                         total_blocks, keep_prob,
-                         weight_decay, nesterov_momentum, model_type, dataset,
+        super().__init__(data_provider, model_type, depth, dataset,
                          should_save_logs, should_save_model,
-                         renew_logs,
-                         reduction,
-                         bc_mode,
-                         **kwargs)
+                         renew_logs)
 
-    def _build_graph(self):
-        logits = self._inference()
-        self.cross_entropy = tf.losses.softmax_cross_entropy(self.labels, logits)
-        total_loss = tf.losses.get_total_loss(add_regularization_losses=True)
+        self.growth_rate = growth_rate
+        # how many features will be received after first convolution
+        # value the same as in the original Torch code
+        self.first_output_features = growth_rate * 2
+        self.total_blocks = total_blocks
+        self.layers_per_block = (depth - (total_blocks + 1)) // total_blocks
+        self.bc_mode = bc_mode
+        # compression rate at the transition layers
+        self.reduction = reduction
 
-        optimizer = tf.train.MomentumOptimizer(
-            self.learning_rate, self.nesterov_momentum, use_nesterov=True)
-        self.train_step = optimizer.minimize(total_loss)
-
-        prediction = tf.nn.softmax(logits)
-        correct_prediction = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.labels, 1))
-        self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        self.keep_prob = keep_prob
+        self.weight_decay = weight_decay
+        self.nesterov_momentum = nesterov_momentum
 
     def _inference(self):
         growth_rate = self.growth_rate
@@ -77,6 +55,28 @@ class MyDenseNet(DenseNet):
                 logits = slim.fully_connected(net, self.n_classes)
 
             return logits
+
+    def _configration(self):
+        if not self.bc_mode:
+            print("Build %s model with %d blocks, "
+                  "%d composite layers each." % (
+                      self.model_type, self.total_blocks, self.layers_per_block))
+        if self.bc_mode:
+            self.layers_per_block = self.layers_per_block // 2
+            print("Build %s model with %d blocks, "
+                  "%d bottleneck layers and %d composite layers each." % (
+                      self.model_type, self.total_blocks, self.layers_per_block,
+                      self.layers_per_block))
+        print("Reduction at transition layers: %.1f" % self.reduction)
+
+    def _get_optimizer(self):
+        return tf.train.MomentumOptimizer(
+            self.learning_rate, self.nesterov_momentum, use_nesterov=True)
+
+    @property
+    def model_identifier(self):
+        return "{}_k={}_depth={}_ds_{}".format(
+            self.model_type, self.growth_rate, self.depth, self.dataset_name)
 
     def transition_layer(self, _input):
         # call composite function with 1x1 kernel
@@ -118,6 +118,17 @@ class MyDenseNet(DenseNet):
             excitation = tf.reshape(excitation, [-1, 1, 1, out_dim])
             scale = input_x * excitation
             return scale
+
+    def dropout(self, _input):
+        if self.keep_prob < 1:
+            output = tf.cond(
+                self.is_training,
+                lambda: tf.nn.dropout(_input, self.keep_prob),
+                lambda: _input
+            )
+        else:
+            output = _input
+        return output
 
     def arg_scope(self):
         with slim.arg_scope([slim.batch_norm],

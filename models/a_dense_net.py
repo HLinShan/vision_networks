@@ -2,6 +2,10 @@ from models.my_dense_net import MyDenseNet
 import tensorflow as tf
 from tensorflow.contrib import slim
 
+"""
+    每一个densebock的每一层都接受 来自上一个denseblock的同层的输出 作为输入
+"""
+
 
 class ADenseNet(MyDenseNet):
     def __init__(self, data_provider, growth_rate, depth,
@@ -43,7 +47,7 @@ class ADenseNet(MyDenseNet):
             with tf.variable_scope("Transition_to_classes"):
                 net = slim.batch_norm(net)
                 net = tf.reduce_mean(net, axis=[1, 2])
-                # net = slim.flatten(net)
+                net = slim.flatten(net)
                 logits = slim.fully_connected(net, self.n_classes)
 
             return logits
