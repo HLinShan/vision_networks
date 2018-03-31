@@ -44,6 +44,9 @@ class Net(object):
     def model_identifier(self):
         return NotImplementedError
 
+    def _get_loss(self):
+        return NotImplementedError
+
     def _build_graph(self):
 
         logits = self._inference()
@@ -229,3 +232,12 @@ class Net(object):
         mean_loss = np.mean(total_loss)
         mean_accuracy = np.mean(total_accuracy)
         return mean_loss, mean_accuracy
+
+    def prelu(self, _x):
+        alphas = tf.get_variable('alpha', _x.get_shape()[-1],
+                                 initializer=tf.constant_initializer(0.0),
+                                 dtype=tf.float32)
+        pos = tf.nn.relu(_x)
+        neg = alphas * (_x - abs(_x)) * 0.5
+
+        return pos + neg

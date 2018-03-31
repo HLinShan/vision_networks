@@ -1,7 +1,5 @@
 import argparse
 from models.my_dense_net import MyDenseNet
-from models.x_dense_net import XDenseNet
-from models.a_dense_net import ADenseNet
 from models.s_dense_net import SDenseNet
 
 from data_providers.utils import get_data_provider_by_name
@@ -61,12 +59,12 @@ if __name__ == '__main__':
              'choices were restricted to used in paper')
     parser.add_argument(
         '--depth', '-d', type=int, choices=[40, 100, 190, 250],
-        default=120,
+        default=100,
         help='Depth of whole network, restricted to paper choices')
     parser.add_argument(
         '--dataset', '-ds', type=str,
         choices=['C10', 'C10+', 'C100', 'C100+', 'SVHN'],
-        default='C10+',
+        default='C100+',
         help='What dataset should be used')
     parser.add_argument(
         '--total_blocks', '-tb', type=int, default=3, metavar='',

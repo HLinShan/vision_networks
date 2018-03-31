@@ -135,7 +135,7 @@ class MyDenseNet(Net):
                             scale=True,
                             is_training=self.is_training,
                             updates_collections=None,
-                            activation_fn=tf.nn.relu):
+                            activation_fn=self.prelu):
             with slim.arg_scope([slim.conv2d, slim.conv2d_in_plane, slim.separable_conv2d],
                                 activation_fn=None,
                                 weights_initializer=tf.keras.initializers.he_normal(),
