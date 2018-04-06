@@ -38,7 +38,8 @@ class Net(object):
         return NotImplementedError
 
     def _get_optimizer(self):
-        return NotImplementedError
+        return tf.train.MomentumOptimizer(
+            self.learning_rate, self.nesterov_momentum, use_nesterov=True)
 
     @property
     def model_identifier(self):
@@ -80,7 +81,7 @@ class Net(object):
             for dim in shape:
                 variable_parametes *= dim.value
             total_parameters += variable_parametes
-        print("Total training params: %.1fM" % (total_parameters / 1e6))
+        print("Total training params: %.1fM" % (total_parameters / 1048576))
 
     @property
     def save_path(self):
@@ -241,3 +242,15 @@ class Net(object):
         neg = alphas * (_x - abs(_x)) * 0.5
 
         return pos + neg
+
+    def rlrelu(tensor, bounds, is_training):
+        upper = bounds[0];
+        lower = bounds[1];
+
+        # Random value between two bounds
+        my_random = tf.Variable(tf.random_uniform([]) * (upper - lower) + lower)
+        alpha = tf.cond(is_training, lambda: my_random,
+                        lambda: tf.Variable((1.0 * upper + lower) / 2, dtype=tf.float32))
+        # In addition to return the result, we return my_random for initializing on each
+        # iteration and alpha to check the final value used.
+        return (tf.nn.relu(tensor) - tf.nn.relu(-tensor) * alpha), my_random, alpha

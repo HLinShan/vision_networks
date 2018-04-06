@@ -24,7 +24,7 @@ class SDenseNet(MyDenseNet):
     def add_internal_layer(self, _input, growth_rate):
         net = _input
         net = slim.batch_norm(net)
-        net = slim.separable_conv2d(net, self.growth_rate * 4, [1, 1], depth_multiplier=1)
+        net = slim.conv2d(net, self.growth_rate * 4, [1, 1], depth_multiplier=1)
         net = slim.batch_norm(net)
         net = slim.separable_conv2d(net, self.growth_rate, [3, 3], depth_multiplier=1)
         # net = slim.batch_norm(net, activation_fn=None)
@@ -40,6 +40,16 @@ class SDenseNet(MyDenseNet):
         net = slim.avg_pool2d(net, [2, 2])
 
         return net
+
+    def squeeze_excitation_layer(self, input_x, out_dim, ratio=16, c=0):
+        with tf.name_scope('SE_Block_%d' % c):
+            # out_dim = input_x.get_shape()[-1]
+            squeeze = tf.reduce_mean(input_x, axis=[1, 2])
+            excitation = slim.fully_connected(squeeze, out_dim // ratio, activation_fn=tf.nn.relu)
+            excitation = slim.fully_connected(excitation, out_dim, activation_fn=tf.nn.sigmoid)
+            excitation = tf.reshape(excitation, [-1, 1, 1, out_dim])
+            scale = input_x * excitation
+            return scale
 
     @property
     def model_identifier(self):

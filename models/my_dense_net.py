@@ -109,16 +109,6 @@ class MyDenseNet(Net):
             net = self.dropout(net)
         return net
 
-    def squeeze_excitation_layer(self, input_x, out_dim, ratio=16, c=0):
-        with tf.name_scope('se_%d' % c):
-            # out_dim = input_x.get_shape()[-1]
-            squeeze = tf.reduce_mean(input_x, axis=[1, 2])
-            excitation = slim.fully_connected(squeeze, out_dim // ratio, activation_fn=tf.nn.relu)
-            excitation = slim.fully_connected(excitation, out_dim, activation_fn=tf.nn.sigmoid)
-            excitation = tf.reshape(excitation, [-1, 1, 1, out_dim])
-            scale = input_x * excitation
-            return scale
-
     def dropout(self, _input):
         if self.keep_prob < 1:
             output = tf.cond(

@@ -55,7 +55,7 @@ class Resnet(Net):
 
     @property
     def model_identifier(self):
-        return "%s_depth=%d_ds=%s" % (self.model_type, self.depth, self.dataset_name)
+        return "%s-%d_ds=%s" % (self.model_type, self.depth, self.dataset_name)
 
     def residual_block(self, _input, num_outputs):
         num_inputs = _input.get_shape().as_list()[-1]

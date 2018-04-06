@@ -1,6 +1,10 @@
 import argparse
 from models.my_dense_net import MyDenseNet
 from models.s_dense_net import SDenseNet
+from models.resnet import Resnet
+from models.s_resnet import SResnet
+from models.pyramid_net import PyramidNet
+from models.s_pyramid_net import SPyramidNet
 
 from data_providers.utils import get_data_provider_by_name
 
@@ -49,8 +53,9 @@ if __name__ == '__main__':
     parser.add_argument(
         '--model_type', '-m', type=str,
         choices=['DenseNet', 'DenseNet-BC',
-                 'SDenseNet', 'SDenseNet-BC'],
-        default='SDenseNet-BC',
+                 'SDenseNet', 'SDenseNet-BC',
+                 'Resnet', 'SResnet', 'PyramidNet', 'SPyramidNet'],
+        default='SResnet',
         help='What type of model to use')
     parser.add_argument(
         '--growth_rate', '-k', type=int, choices=[4, 6, 12, 24, 40],
@@ -59,7 +64,7 @@ if __name__ == '__main__':
              'choices were restricted to used in paper')
     parser.add_argument(
         '--depth', '-d', type=int, choices=[40, 100, 190, 250],
-        default=100,
+        default=110,
         help='Depth of whole network, restricted to paper choices')
     parser.add_argument(
         '--dataset', '-ds', type=str,
@@ -82,12 +87,8 @@ if __name__ == '__main__':
         '--reduction', '-red', type=float, default=0.5, metavar='',
         help='reduction Theta at transition layer for DenseNets-BC models')
     parser.add_argument(
-        '--cardinality', '-c', type=int, default=2,
-        help='cardinality')
-    parser.add_argument(
-        '--bc_count', '-bcc', type=int, default=3,
-        help='total layers in the bottleneck'
-    )
+        '--alpha', '-a', type=int, default=48, metavar='',
+        help='pyramidnet alpha')
 
     parser.add_argument(
         '--logs', dest='should_save_logs', action='store_true',
@@ -148,7 +149,7 @@ if __name__ == '__main__':
     # if args.model_type == 'DenseNet' or args.model_type == 'DenseNet-BC':
     # model = MyDenseNet(data_provider=data_provider, **model_params)
     # else:
-    model = SDenseNet(data_provider=data_provider, **model_params)
+    model = SResnet(data_provider=data_provider, **model_params)
 
     model.build()
     # model.summary_writer.add_graph(model.sess.graph)
