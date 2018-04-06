@@ -244,8 +244,8 @@ class Net(object):
         return pos + neg
 
     def rlrelu(tensor, bounds, is_training):
-        upper = bounds[0];
-        lower = bounds[1];
+        upper = bounds[0]
+        lower = bounds[1]
 
         # Random value between two bounds
         my_random = tf.Variable(tf.random_uniform([]) * (upper - lower) + lower)
