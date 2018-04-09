@@ -243,14 +243,14 @@ class Net(object):
 
         return pos + neg
 
-    def rlrelu(tensor, bounds, is_training):
-        upper = bounds[0]
-        lower = bounds[1]
+    def rlrelu(self, _input, bounds, is_training):
 
         # Random value between two bounds
-        my_random = tf.Variable(tf.random_uniform([]) * (upper - lower) + lower)
+        my_random = tf.random_uniform([], minval=bounds[0], maxval=bounds[1])
+
         alpha = tf.cond(is_training, lambda: my_random,
-                        lambda: tf.Variable((1.0 * upper + lower) / 2, dtype=tf.float32))
+                        lambda: tf.constant((bounds[0] + bounds[1]) / 2.0, dtype=tf.float32))
         # In addition to return the result, we return my_random for initializing on each
         # iteration and alpha to check the final value used.
-        return (tf.nn.relu(tensor) - tf.nn.relu(-tensor) * alpha), my_random, alpha
+        # return (tf.nn.relu(_input) - tf.nn.relu(-_input) * alpha), my_random, alpha
+        return tf.nn.relu(_input) - tf.nn.relu(-_input) * alpha
