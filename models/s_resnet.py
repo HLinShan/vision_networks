@@ -9,8 +9,8 @@ class SResnet(Resnet):
         n = self.residual_blocks_per_block
         layers = []
         with slim.arg_scope(self.arg_scope()):
-            net = slim.batch_norm(self.images)
-            net = slim.conv2d(net, 16, [3, 3])
+            # net = slim.batch_norm(self.images)
+            net = slim.conv2d(self.images, 16, [3, 3])
             layers.append(net)
             with tf.variable_scope("block1"):
                 for i in range(n):
@@ -18,18 +18,21 @@ class SResnet(Resnet):
                         net = self.residual_block(layers[-1], 16)
                         layers.append(net)
 
-            with tf.variable_scope("SE_block1"):
-                net = self.squeeze_excitation_layer(layers[-1], 16)
-                layers.append(net)
+            # with tf.variable_scope("SE_block1"):
+            #     net = self.squeeze_excitation_layer(layers[-1], 16)
+            #     net = slim.avg_pool2d(net, [2, 2])
+            #     layers.append(net)
 
             with tf.variable_scope("block2"):
                 for i in range(n):
                     with tf.variable_scope("residual_block_%d" % i):
                         net = self.residual_block(layers[-1], 32)
                         layers.append(net)
-            with tf.variable_scope("SE_block2"):
-                net = self.squeeze_excitation_layer(layers[-1], 32)
-                layers.append(net)
+            #
+            # with tf.variable_scope("SE_block2"):
+            #     net = self.squeeze_excitation_layer(layers[-1], 32)
+            #     net = slim.avg_pool2d(net, [2, 2])
+            #     layers.append(net)
 
             with tf.variable_scope("block3"):
                 for i in range(n):
@@ -37,12 +40,14 @@ class SResnet(Resnet):
                         net = self.residual_block(layers[-1], 64)
                         layers.append(net)
 
-            with tf.variable_scope("SE_block3"):
-                net = self.squeeze_excitation_layer(layers[-1], 64)
-                layers.append(net)
+            # with tf.variable_scope("SE_block3"):
+            #     net = self.squeeze_excitation_layer(layers[-1], 64)
+            #     net = slim.avg_pool2d(net,[2,2])
+            #     layers.append(net)
 
             with tf.variable_scope("fc"):
                 net = slim.batch_norm(layers[-1])
+                net = tf.nn.relu(net)
                 net = tf.reduce_mean(net, [1, 2])
                 logits = slim.fully_connected(net, self.n_classes)
         return logits
@@ -55,10 +60,12 @@ class SResnet(Resnet):
             stride = 2
 
         net = slim.batch_norm(_input)
-        net = slim.separable_conv2d(net, num_outputs, [3, 3], stride=stride, depth_multiplier=1)
+        net = slim.conv2d(net, num_outputs, [3, 3], stride=stride)
 
         net = slim.batch_norm(net)
+        net = tf.nn.relu(net)
         net = slim.separable_conv2d(net, num_outputs, [3, 3], depth_multiplier=1)
+        net = slim.batch_norm(net)
 
         if stride == 1:
             net = net + _input
@@ -67,6 +74,10 @@ class SResnet(Resnet):
             net = net + tf.pad(pad, [[0, 0], [0, 0], [0, 0], [0, num_inputs]])
 
         return net
+
+    @property
+    def model_identifier(self):
+        return "%s-SE-%d_ds=%s_3" % (self.model_type, self.depth, self.dataset_name)
 
     def squeeze_excitation_layer(self, input_x, out_dim, ratio=16, c=0):
         with tf.name_scope('SE_Block_%d' % c):
