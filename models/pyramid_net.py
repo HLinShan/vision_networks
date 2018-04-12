@@ -33,14 +33,14 @@ class PyramidNet(Net):
         layers = []
         with slim.arg_scope(self.arg_scope()):
             with tf.variable_scope("first_conv"):
+                # net = slim.batch_norm(net)
                 net = slim.conv2d(self.images, start_channel, [3, 3])
-                net = slim.batch_norm(net)
                 layers.append(net)
 
             with tf.variable_scope("block1"):
                 for i in range(n):
                     start_channel = start_channel + add_channel
-                    net = self.bottleneck(layers[-1], self.round(start_channel), stride=1, c=i)
+                    net = self.basic_block(layers[-1], self.round(start_channel), stride=1, c=i)
                     layers.append(net)
 
             with tf.variable_scope("block2"):
@@ -50,7 +50,7 @@ class PyramidNet(Net):
                     else:
                         stride = 1
                     start_channel = start_channel + add_channel
-                    net = self.bottleneck(layers[-1], self.round(start_channel), stride=stride, c=i)
+                    net = self.basic_block(layers[-1], self.round(start_channel), stride=stride, c=i)
                     layers.append(net)
 
             with tf.variable_scope("block3"):
@@ -60,7 +60,7 @@ class PyramidNet(Net):
                     else:
                         stride = 1
                     start_channel = start_channel + add_channel
-                    net = self.bottleneck(layers[-1], self.round(start_channel), stride=stride, c=i)
+                    net = self.basic_block(layers[-1], self.round(start_channel), stride=stride, c=i)
                     layers.append(net)
 
             with tf.variable_scope("fully_connected"):
