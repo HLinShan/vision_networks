@@ -54,8 +54,8 @@ if __name__ == '__main__':
         '--model_type', '-m', type=str,
         choices=['DenseNet', 'DenseNet-BC',
                  'SDenseNet', 'SDenseNet-BC',
-                 'Resnet', 'SResnet', 'PyramidNet', 'SPyramidNet'],
-        default='SResnet',
+                 'Resnet', 'SResnet', 'PyramidNet', 'SPyramidNet','SPyramidNetx'],
+        default='PyramidNet',
         help='What type of model to use')
     parser.add_argument(
         '--growth_rate', '-k', type=int, choices=[4, 6, 12, 24, 40],
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--dataset', '-ds', type=str,
         choices=['C10', 'C10+', 'C100', 'C100+', 'SVHN'],
-        default='C100+',
+        default='SVHN',
         help='What dataset should be used')
     parser.add_argument(
         '--total_blocks', '-tb', type=int, default=3, metavar='',
@@ -149,7 +149,7 @@ if __name__ == '__main__':
     # if args.model_type == 'DenseNet' or args.model_type == 'DenseNet-BC':
     # model = MyDenseNet(data_provider=data_provider, **model_params)
     # else:
-    model = SResnet(data_provider=data_provider, **model_params)
+    model = PyramidNet(data_provider=data_provider, **model_params)
 
     model.build()
     # model.summary_writer.add_graph(model.sess.graph)
