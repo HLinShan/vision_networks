@@ -18,7 +18,7 @@ class Xception(Net):
         self.nesterov_momentum = nesterov_momentum
 
     def _configration(self):
-        print("Xception")
+        print("Xception %d layers"% self.depth)
         pass
 
     def _inference(self):
@@ -26,23 +26,23 @@ class Xception(Net):
             # ===========ENTRY FLOW==============
             with tf.variable_scope("ENTRY_FLOW"):
                 # Block 1
-                net = slim.conv2d(self.images, 32, [3, 3], padding='valid', scope='block1_conv1')
-                net = slim.batch_norm(net, scope='block1_bn1')
-                net = tf.nn.relu(net, name='block1_relu1')
-                net = slim.conv2d(net, 32, [3, 3], padding='valid', scope='block1_conv2')
-                net = slim.batch_norm(net, scope='block1_bn2')
-                net = tf.nn.relu(net, name='block1_relu2')
-                residual = slim.conv2d(net, 64, [1, 1], stride=2, scope='block1_res_conv')
-                residual = slim.batch_norm(residual, scope='block1_res_bn')
+                net = slim.conv2d(self.images, 32, [3, 3], padding='valid')
+                net = slim.batch_norm(net)
+                net = tf.nn.relu(net)
+                net = slim.conv2d(net, 32, [3, 3], padding='valid')
+                net = slim.batch_norm(net)
+                net = tf.nn.relu(net)
+                residual = slim.conv2d(net, 64, [1, 1], stride=2)
+                residual = slim.batch_norm(residual,)
 
                 # Block 2
-                net = slim.separable_conv2d(net, 64, [3, 3], scope='block2_dws_conv1')
-                net = slim.batch_norm(net, scope='block2_bn1')
-                net = tf.nn.relu(net, name='block2_relu1')
-                net = slim.separable_conv2d(net, 64, [3, 3], scope='block2_dws_conv2')
-                net = slim.batch_norm(net, scope='block2_bn2')
-                net = slim.max_pool2d(net, [3, 3], stride=2, padding='same', scope='block2_max_pool')
-                net = tf.add(net, residual, name='block2_add')
+                net = slim.separable_conv2d(net, 64, [3, 3])
+                net = slim.batch_norm(net)
+                net = tf.nn.relu(net)
+                net = slim.separable_conv2d(net, 64, [3, 3])
+                net = slim.batch_norm(net)
+                net = slim.max_pool2d(net, [3, 3], stride=2)
+                net = tf.add(net, residual)
 
             # residual = slim.conv2d(net, 256, [1, 1], stride=2, scope='block2_res_conv')
             # residual = slim.batch_norm(residual, scope='block2_res_bn')
@@ -71,44 +71,43 @@ class Xception(Net):
             # net = tf.add(net, residual, name='block4_add')
 
             # ===========MIDDLE FLOW===============
+            n = (self.depth-10)//3
             with tf.name_scope("MIDDLE_FLOW"):
-                for i in range(32):
-                    block_prefix = 'block%s_' % (str(i + 3))
-
+                for i in range(n):
                     residual = net
-                    net = tf.nn.relu(net, name=block_prefix + 'relu1')
-                    net = slim.separable_conv2d(net, 64, [3, 3], scope=block_prefix + 'dws_conv1')
-                    net = slim.batch_norm(net, scope=block_prefix + 'bn1')
-                    net = tf.nn.relu(net, name=block_prefix + 'relu2')
-                    net = slim.separable_conv2d(net, 64, [3, 3], scope=block_prefix + 'dws_conv2')
-                    net = slim.batch_norm(net, scope=block_prefix + 'bn2')
-                    net = tf.nn.relu(net, name=block_prefix + 'relu3')
-                    net = slim.separable_conv2d(net, 64, [3, 3], scope=block_prefix + 'dws_conv3')
-                    net = slim.batch_norm(net, scope=block_prefix + 'bn3')
-                    net = tf.add(net, residual, name=block_prefix + 'add')
+                    net = tf.nn.relu(net)
+                    net = slim.separable_conv2d(net, 64, [3, 3])
+                    net = slim.batch_norm(net)
+                    net = tf.nn.relu(net)
+                    net = slim.separable_conv2d(net, 64, [3, 3])
+                    net = slim.batch_norm(net)
+                    net = tf.nn.relu(net)
+                    net = slim.separable_conv2d(net, 64, [3, 3])
+                    net = slim.batch_norm(net)
+                    net = tf.add(net, residual)
 
             # ========EXIT FLOW============
             with tf.variable_scope("EXIT_FLOW"):
-                residual = slim.conv2d(net, 128, [1, 1], stride=2, scope='block12_res_conv')
-                residual = slim.batch_norm(residual, scope='block12_res_bn')
+                residual = slim.conv2d(net, 128, [1, 1], stride=2)
+                residual = slim.batch_norm(residual)
 
-                net = tf.nn.relu(net, name='block13_relu1')
-                net = slim.separable_conv2d(net, 128, [3, 3], scope='block13_dws_conv1')
-                net = slim.batch_norm(net, scope='block13_bn1')
+                net = tf.nn.relu(net)
+                net = slim.separable_conv2d(net, 128, [3, 3])
+                net = slim.batch_norm(net)
 
-                net = tf.nn.relu(net, name='block13_relu2')
-                net = slim.separable_conv2d(net, 128, [3, 3], scope='block13_dws_conv2')
-                net = slim.batch_norm(net, scope='block13_bn2')
+                net = tf.nn.relu(net)
+                net = slim.separable_conv2d(net, 128, [3, 3])
+                net = slim.batch_norm(net)
 
-                net = slim.max_pool2d(net, [3, 3], stride=2, padding='same', scope='block13_max_pool')
-                net = tf.add(net, residual, name='block13_add')
+                net = slim.max_pool2d(net, [3, 3], stride=2, padding='same')
+                net = tf.add(net, residual)
 
-                net = slim.separable_conv2d(net, 128, [3, 3], scope='block14_dws_conv1')
-                net = slim.batch_norm(net, scope='block14_bn1')
-                net = tf.nn.relu(net, name='block14_relu1')
-                net = slim.separable_conv2d(net, 128, [3, 3], scope='block14_dws_conv2')
-                net = slim.batch_norm(net, scope='block14_bn2')
-                net = tf.nn.relu(net, name='block14_relu2')
+                net = slim.separable_conv2d(net, 128, [3, 3])
+                net = slim.batch_norm(net)
+                net = tf.nn.relu(net)
+                net = slim.separable_conv2d(net, 128, [3, 3])
+                net = slim.batch_norm(net)
+                net = tf.nn.relu(net)
 
                 net = tf.reduce_mean(net, axis=[1, 2])
 
