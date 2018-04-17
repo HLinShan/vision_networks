@@ -24,7 +24,7 @@ class SDenseNet(MyDenseNet):
     def add_internal_layer(self, _input, growth_rate):
         net = _input
         net = slim.batch_norm(net)
-        net = slim.conv2d(net, self.growth_rate * 4, [1, 1], depth_multiplier=1)
+        net = slim.conv2d(net, self.growth_rate * 4, [1, 1])
         net = slim.batch_norm(net)
         net = slim.separable_conv2d(net, self.growth_rate, [3, 3], depth_multiplier=1)
         # net = slim.batch_norm(net, activation_fn=None)
@@ -35,7 +35,7 @@ class SDenseNet(MyDenseNet):
         # call composite function with 1x1 kernel
         out_features = int(int(_input.get_shape()[-1]) * self.reduction)
         net = self.composite_function(_input, out_features, kernel_size=1)
-        net = self.squeeze_excitation_layer(net, out_features)
+        # net = self.squeeze_excitation_layer(net, out_features)
         # run average pooling
         net = slim.avg_pool2d(net, [2, 2])
 

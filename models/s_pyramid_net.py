@@ -21,6 +21,7 @@ class SPyramidNet(PyramidNet):
 
             net = slim.batch_norm(_input)
             net = slim.separable_conv2d(net, out_channels, [3, 3], depth_multiplier=1, stride=stride)
+            # net = slim.conv2d(net, out_channels, [3, 3], stride=stride)
             net = slim.batch_norm(net)
             net = tf.nn.relu(net)
             net = slim.separable_conv2d(net, out_channels, [3, 3], depth_multiplier=1)

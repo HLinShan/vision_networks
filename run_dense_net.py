@@ -54,8 +54,9 @@ if __name__ == '__main__':
         '--model_type', '-m', type=str,
         choices=['DenseNet', 'DenseNet-BC',
                  'SDenseNet', 'SDenseNet-BC',
-                 'Resnet', 'SResnet', 'PyramidNet', 'SPyramidNet'],
-        default='SResnet',
+                 'Resnet', 'SResnet', 'SResnet',
+                 'PyramidNet', 'SPyramidNet','SPyramidNetx','Xception'],
+        default='SDenseNet-BC',
         help='What type of model to use')
     parser.add_argument(
         '--growth_rate', '-k', type=int, choices=[4, 6, 12, 24, 40],
@@ -64,7 +65,7 @@ if __name__ == '__main__':
              'choices were restricted to used in paper')
     parser.add_argument(
         '--depth', '-d', type=int, choices=[40, 100, 190, 250],
-        default=110,
+        default=100,
         help='Depth of whole network, restricted to paper choices')
     parser.add_argument(
         '--dataset', '-ds', type=str,
@@ -149,7 +150,7 @@ if __name__ == '__main__':
     # if args.model_type == 'DenseNet' or args.model_type == 'DenseNet-BC':
     # model = MyDenseNet(data_provider=data_provider, **model_params)
     # else:
-    model = SResnet(data_provider=data_provider, **model_params)
+    model = SDenseNet(data_provider=data_provider, **model_params)
 
     model.build()
     # model.summary_writer.add_graph(model.sess.graph)
