@@ -26,10 +26,10 @@ class Xception(Net):
             # ===========ENTRY FLOW==============
             with tf.variable_scope("ENTRY_FLOW"):
                 # Block 1
-                net = slim.conv2d(self.images, 32, [3, 3], padding='valid')
+                net = slim.conv2d(self.images, 32, [3, 3], padding='same')
                 net = slim.batch_norm(net)
                 net = tf.nn.relu(net)
-                net = slim.conv2d(net, 32, [3, 3], padding='valid')
+                net = slim.conv2d(net, 32, [3, 3], padding='same')
                 net = slim.batch_norm(net)
                 net = tf.nn.relu(net)
                 residual = slim.conv2d(net, 64, [1, 1], stride=2)
@@ -41,7 +41,7 @@ class Xception(Net):
                 net = tf.nn.relu(net)
                 net = slim.separable_conv2d(net, 64, [3, 3])
                 net = slim.batch_norm(net)
-                net = slim.max_pool2d(net, [3, 3], stride=2)
+                net = slim.max_pool2d(net, [3, 3], stride=2, padding="same")
                 net = tf.add(net, residual)
 
             # residual = slim.conv2d(net, 256, [1, 1], stride=2, scope='block2_res_conv')
